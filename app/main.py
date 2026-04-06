@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import shutil
 import os
-from app.rag import create_rag_chain
+from app.rag import create_rag_chain 
 
 app = FastAPI()
 
@@ -16,7 +16,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-rag_chain = None
+if os.path.exists("data/vectorstore"):
+    rag_chain = create_rag_chain(None)
+else:
+    rag_chain = None
 
 class QuestionRequest(BaseModel):
     question: str
