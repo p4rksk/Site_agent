@@ -1,16 +1,11 @@
 import os
-import fitz  # pymupdf
-import base64
-from PIL import Image
-import io
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import FAISS
+from langchain_community.document_loaders.parsers import LLMImageBlobParser
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.documents import Document
-from langchain_core.messages import HumanMessage
 
 
 load_dotenv()
@@ -22,6 +17,12 @@ def create_rag_chain(pdf_path: str):
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
 
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        google_api_key=os.getenv("GOOGLE_API_KEY")
+    )
+
+
     if pdf_path is None:
         # 서버 시작 시 기존 vectorstore 불러오기
         vectorstore = FAISS.load_local("data/vectorstore", embeddings, allow_dangerous_deserialization=True)
@@ -31,12 +32,18 @@ def create_rag_chain(pdf_path: str):
         existing = FAISS.load_local("data/vectorstore", embeddings, allow_dangerous_deserialization=True)
 
         # 새 PDF 임베딩
-        loader = PyPDFLoader(pdf_path, mode="page")
+        loader = PyMuPDFLoader(
+            pdf_path, 
+            mode="page",
+            images_inner_format="markdown-img", #  ![이미지설명](링크) 형태로 저장
+            images_parser=LLMImageBlobParser(model=llm)
+        )
+    
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100) 
         chunks = []
        
         for documents in loader.lazy_load(): # PDF의 한페이지씩 쪼개서 문서 파일로 변환 메모리 효율적 사용
-            chunks.extend(splitter.split_documents(documents))
+            chunks.extend(splitter.split_documents([documents]))
            
         new_vectorstore = FAISS.from_documents(chunks, embeddings)
         # 기존 + 새 PDF 합치기
@@ -46,22 +53,22 @@ def create_rag_chain(pdf_path: str):
 
     else:
         # vectorstore 없으면 새로 만들기
-        loader = PyPDFLoader(pdf_path, mode="page")
+        loader = PyMuPDFLoader(
+            pdf_path, 
+            mode="page",
+            images_inner_format="markdown-img", #  ![이미지설명](링크) 형태로 저장
+            images_parser=LLMImageBlobParser(model=llm)
+        )
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = []
 
         for documents in loader.lazy_load(): # PDF의 한페이지씩 쪼개서 문서 파일로 변환 메모리 효율적 사용
-            chunks.extend(splitter.split_documents(documents))
+            chunks.extend(splitter.split_documents([documents]))
 
         vectorstore = FAISS.from_documents(chunks, embeddings)
         vectorstore.save_local("data/vectorstore")
 
-    # 4. LLM 설정
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=os.getenv("GOOGLE_API_KEY")
-    )
-
+    
     # 5. 프롬프트 설정 - LLM에게 어떻게 답변할지 지시하는 것
     prompt = ChatPromptTemplate.from_template("""
 아래 문서 내용을 바탕으로 질문에 답변해주세요.

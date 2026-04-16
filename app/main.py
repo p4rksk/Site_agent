@@ -66,7 +66,6 @@ async def ask_question(request: QuestionRequest):
     # LLM 답변
     context = "\n".join([result.page_content for result in search])
     chain = prompt | llm | StrOutputParser() # 응답 파이프라인 
-    answer = chain.invoke({"context": context, "question": request.question})
 
     # 503 에러 시 3번까지 재시도 (Gemini 서버 과부하 대비)
     for attempt in range(3):
