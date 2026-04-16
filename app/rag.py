@@ -32,11 +32,13 @@ def create_rag_chain(pdf_path: str):
 
         # 새 PDF 임베딩
         loader = PyPDFLoader(pdf_path, mode="page")
-        documents = loader.load()
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-        chunks = splitter.split_documents(documents)
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100) 
+        chunks = []
+       
+        for documents in loader.lazy_load(): # PDF의 한페이지씩 쪼개서 문서 파일로 변환 메모리 효율적 사용
+            chunks.extend(splitter.split_documents(documents))
+           
         new_vectorstore = FAISS.from_documents(chunks, embeddings)
-
         # 기존 + 새 PDF 합치기
         existing.merge_from(new_vectorstore)
         existing.save_local("data/vectorstore")
@@ -45,10 +47,11 @@ def create_rag_chain(pdf_path: str):
     else:
         # vectorstore 없으면 새로 만들기
         loader = PyPDFLoader(pdf_path, mode="page")
-        documents = loader.load()
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-        chunks = splitter.split_documents(documents)
+        chunks = []
 
+        for documents in loader.lazy_load(): # PDF의 한페이지씩 쪼개서 문서 파일로 변환 메모리 효율적 사용
+            chunks.extend(splitter.split_documents(documents))
 
         vectorstore = FAISS.from_documents(chunks, embeddings)
         vectorstore.save_local("data/vectorstore")
