@@ -1,4 +1,4 @@
-package com.siteagent.backend.entity;
+package com.siteagent.backend.admin;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,10 +22,16 @@ public class Admin {
     private String companyName;
 
     @Column(nullable = false, unique = true)
-    private String adminId;
+    private String siteAdminId;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false, unique = true)
+    private String businessNumber; 
+
+    @Column(nullable = false)
+    private String phone;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -36,14 +42,18 @@ public class Admin {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Admin(String companyName, String adminId, String password) {
+    public Admin(String companyName, String siteAdminId, String password, String businessNumber, String phone) {
         this.companyName = companyName;
-        this.adminId = adminId;
+        this.siteAdminId = siteAdminId;
         this.password = password;
+        this.businessNumber = businessNumber;
+        this.phone = phone;
     }
 
-    public void updateProfile(String companyName, String password) {
+    public void updateProfile(String companyName, String password, String businessNumber, String phone) {
         this.companyName = companyName;
         this.password = password;
+        this.businessNumber = businessNumber;
+        this.phone = phone;
     }
 }

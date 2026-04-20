@@ -1,10 +1,13 @@
-package com.siteagent.backend.entity;
+package com.siteagent.backend.site;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.siteagent.backend.admin.Admin;
+
 import java.time.LocalDateTime;
 
 @Entity

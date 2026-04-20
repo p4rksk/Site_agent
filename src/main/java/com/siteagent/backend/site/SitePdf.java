@@ -1,4 +1,4 @@
-package com.siteagent.backend.entity;
+package com.siteagent.backend.site;
 
 import jakarta.persistence.*;
 import lombok.*;

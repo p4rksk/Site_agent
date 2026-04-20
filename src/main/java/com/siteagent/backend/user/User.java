@@ -1,4 +1,4 @@
-package com.siteagent.backend.entity;
+package com.siteagent.backend.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,29 +8,23 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chat_log_tb")
+@Table(name = "user_tb")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class ChatLog {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id", nullable = false)
-    private Site site;
+    @Column(nullable = false, unique = true)
+    private String kakaoId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private String username;
 
-    @Column(columnDefinition = "TEXT")
-    private String question;
-
-    @Column(columnDefinition = "TEXT")
-    private String answer;
+    private String profileImage;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -41,10 +35,9 @@ public class ChatLog {
     private LocalDateTime updatedAt;
 
     @Builder
-    public ChatLog(Site site, User user, String question, String answer) {
-        this.site = site;
-        this.user = user;
-        this.question = question;
-        this.answer = answer;
+    public User(String kakaoId, String username, String profileImage) {
+        this.kakaoId = kakaoId;
+        this.username = username;
+        this.profileImage = profileImage;
     }
 }

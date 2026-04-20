@@ -1,4 +1,4 @@
-package com.siteagent.backend.config;
+package com.siteagent.backend.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -11,7 +11,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:3000",           // 로컬 개발
+                        "http://localhost:3000",          
                         "https://site-agent-front.vercel.app"  
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
