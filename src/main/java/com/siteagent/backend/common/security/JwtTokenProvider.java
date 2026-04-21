@@ -26,10 +26,11 @@ public class JwtTokenProvider {
     }
 
     // 토큰 생성
-    public String createToken(Long id, String loginId) {
+    public String createToken(Long id, String loginId, String role) {
         return Jwts.builder()
                 .subject(String.valueOf(id))
                 .claim("loginId", loginId)
+                .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getKey())
@@ -40,6 +41,11 @@ public class JwtTokenProvider {
     public Long getAdminId(String token) {
         Claims claims = getClaims(token);
         return Long.parseLong(claims.getSubject());
+    }
+
+    public String getRole(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("role", String.class);
     }
 
     // 토큰 유효성 검사

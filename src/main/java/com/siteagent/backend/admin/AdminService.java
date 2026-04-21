@@ -79,7 +79,7 @@ public class AdminService {
             if (!passwordEncoder.matches(request.password(), admin.get().getPassword())) {
                 throw new CustomException(401, "비밀번호가 틀렸습니다.");
             }
-            String tocken =  jwtTokenProvider.createToken(admin.get().getId(), request.loginId());
+            String tocken =  jwtTokenProvider.createToken(admin.get().getId(), request.loginId(), "SUPER_ADMIN");
             return new LoginResponse(tocken, "SUPER_ADMIN", admin.get().getId(), admin.get().getCompanyName());
             
         }
@@ -89,7 +89,7 @@ public class AdminService {
             if (!passwordEncoder.matches(request.password(), siteAdmin.get().getPassword())) {
                 throw new CustomException(401, "비밀번호가 틀렸습니다.");
             }
-            String tocken =  jwtTokenProvider.createToken(siteAdmin.get().getId(), request.loginId());
+            String tocken =  jwtTokenProvider.createToken(siteAdmin.get().getId(), request.loginId(), "SITE_ADMIN");
             return new LoginResponse(tocken, "SITE_ADMIN", siteAdmin.get().getId(), null);
         }
 

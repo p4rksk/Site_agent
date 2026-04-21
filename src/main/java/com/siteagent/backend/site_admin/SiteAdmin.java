@@ -31,6 +31,10 @@ public class SiteAdmin {
     @Column(nullable = false)
     private String password;
 
+    private String name;
+    
+    private String phone;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

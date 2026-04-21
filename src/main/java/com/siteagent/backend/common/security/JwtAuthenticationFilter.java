@@ -24,6 +24,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String token = resolveToken(request);
+
+        //  브라우저가 서버에게 요청 보내도 되는지 확인할 때 OPTIONS를 보냄 이게 CORS에 걸리다보니까 통과 시켜주기
+        if (request.getMethod().equals("OPTIONS")) { 
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         if (token == null) {
             throw new CustomException(401, "토큰이 없습니다.");
@@ -31,7 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Long adminId = jwtTokenProvider.getAdminId(token);
+            String role = jwtTokenProvider.getRole(token);
             request.setAttribute("adminId", adminId);
+            request.setAttribute("role", role);
         }
 
         filterChain.doFilter(request, response);
@@ -46,4 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         return null;
     }
+
+    
 }
