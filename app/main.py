@@ -7,6 +7,7 @@ from app.rag import create_rag_chain
 from langchain_core.output_parsers import StrOutputParser
 from fastapi.responses import FileResponse
 import asyncio
+import httpx
 
 app = FastAPI()
 
@@ -19,38 +20,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if os.path.exists("data/vectorstore"):
-    rag_chain = create_rag_chain(None)
-else:
-    rag_chain = None
+rag_chains = {} 
+
+class UploadRequest(BaseModel):
+    site_id: int
+    pdf_url: str
 
 class QuestionRequest(BaseModel):
     question: str
+    site_id: int    
 
 @app.get("/")
 async def root():
     return {"status": "ok"}
 
 @app.post("/upload-pdf")
-async def upload_pdf(file: UploadFile = File(...)):
-    # PDF 파일을 data 폴더에 저장
-    global rag_chain
-    file_path = f"data/{file.filename}"
-    with open(file_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+async def upload_pdf(request:UploadRequest):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(request.pdf_url)
     
-    # RAG 체인 생성
-    rag_chain = create_rag_chain(file_path)
-    return {"message": f"{file.filename} 업로드 완료. 질문할 수 있어요!"}
+    # siteId별로 파일 저장
+    file_path = f"data/{request.site_id}.pdf"
+    with open(file_path, "wb") as f:
+        f.write(response.content)
+    
+    # siteId별로 rag_chain 저장
+    rag_chains[request.site_id] = create_rag_chain(file_path)
+    return {"message": "업로드 완료. 질문할 수 있어요!"}
 
 @app.post("/ask")
 async def ask_question(request: QuestionRequest):
-    if rag_chain is None:
+    chain_data = rag_chains.get(request.site_id)
+    if chain_data is None:
         return {"error": "등록된 PDF가 없습니다."}
-
-    retriever = rag_chain["retriever"]
-    llm = rag_chain["llm"]
-    prompt = rag_chain["prompt"]
+    
+    retriever = chain_data["retriever"]
+    llm = chain_data["llm"]
+    prompt = chain_data["prompt"]
 
     # 관련 문서 검색
     search = retriever.invoke(request.question)
@@ -73,6 +79,7 @@ async def ask_question(request: QuestionRequest):
             answer = chain.invoke({"context": context, "question": request.question})
             break
         except Exception as e:
+            print(f"❌ Gemini 실패 (attempt {attempt+1}/3): {type(e).__name__}: {e}")  
             if attempt == 2:  # 3번 다 실패하면
                 return {
                     "answer": "현재 AI 서버가 혼잡합니다. 잠시 후 다시 시도해주세요.",

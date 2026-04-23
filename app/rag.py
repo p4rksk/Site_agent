@@ -41,9 +41,12 @@ def create_rag_chain(pdf_path: str):
     
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100) 
         chunks = []
-       
-        for documents in loader.lazy_load(): # PDF의 한페이지씩 쪼개서 문서 파일로 변환 메모리 효율적 사용
-            chunks.extend(splitter.split_documents([documents]))
+        try:
+            for documents in loader.lazy_load():
+             
+                chunks.extend(splitter.split_documents([documents]))
+        except Exception as e:
+            print(f"PDF 로딩 에러: {e}")
            
         new_vectorstore = FAISS.from_documents(chunks, embeddings)
         # 기존 + 새 PDF 합치기
