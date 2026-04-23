@@ -69,7 +69,7 @@ public class Site {
         this.managerPhone = managerPhone;
     }
 
-    public void delete() {
+    public void softDelete() {
         this.deletedAt = LocalDateTime.now();
     }
 }

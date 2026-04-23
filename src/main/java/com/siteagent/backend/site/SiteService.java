@@ -125,4 +125,11 @@ public class SiteService {
             throw new CustomException(500, "FastAPI 전송 실패");
         }
     }
+
+    @Transactional
+    public void siteDelete(Long siteId) {
+        Site site = siteRepository.findById(siteId)
+                .orElseThrow(() -> new CustomException(404, "존재하지 않는 현장입니다."));
+        site.softDelete();
+    }
 }

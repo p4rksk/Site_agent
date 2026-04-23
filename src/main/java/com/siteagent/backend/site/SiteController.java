@@ -81,6 +81,22 @@ public class SiteController {
         siteService.siteUpdate(siteId, name, managerName, managerPhone, file);
         return ResponseEntity.ok().build();
     }
+
+    //현장 삭제
+    @DeleteMapping("/{siteId}")
+    public ResponseEntity<?> deleteSite(
+            @PathVariable("siteId") Long siteId,
+            HttpServletRequest request) {
+
+        String role = (String) request.getAttribute("role");
+
+        if (!"SUPER_ADMIN".equals(role) && !"SITE_ADMIN".equals(role)) {
+            throw new CustomException(403, "권한이 없습니다.");
+        }
+
+        siteService.siteDelete(siteId);
+        return ResponseEntity.noContent().build();
+    }
     
 
 }
