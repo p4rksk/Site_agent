@@ -32,7 +32,7 @@ supabase:
   bucket: pdf
 
 fastapi:
-  url:  ${FASTAPI_URL}
+  url: ${FASTAPI_URL}
 
 server:
   port: ${PORT:8080}
