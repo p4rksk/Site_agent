@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.siteagent.backend.site.SiteService;
+import com.siteagent.backend.site.response.SiteListResponse;
+
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -12,6 +16,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final SiteService siteService;
 
     @PostMapping("/kakao-login")
     public ResponseEntity<?> kakaoLogin(@RequestBody Map<String, String> body) {
@@ -19,4 +24,10 @@ public class UserController {
         String token = userService.kakaoLogin(code);
         return ResponseEntity.ok(Map.of("token", token));
     }
+    
+
+    @GetMapping("/sites")
+    public ResponseEntity<List<SiteListResponse>> getPublicSiteList() {
+    return ResponseEntity.ok(siteService.getPublicSiteList());
+}
 }

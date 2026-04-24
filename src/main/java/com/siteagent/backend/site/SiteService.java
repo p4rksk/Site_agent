@@ -60,6 +60,14 @@ public class SiteService {
                 .collect(Collectors.toList());
     }
 
+    // 사용자입장 현장 목록 조회 
+    public List<SiteListResponse> getPublicSiteList() {
+    return siteRepository.findAllActiveSites()
+        .stream()
+        .map(SiteListResponse::from)
+        .toList();
+    }
+
     // 현장 상세보기
     public SiteDetailResponse getSite(Long siteId) {
         Site site = siteRepository.findById(siteId).orElseThrow  
