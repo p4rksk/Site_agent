@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Long adminId = jwtTokenProvider.getAdminId(token);
+            Long adminId = jwtTokenProvider.getId(token);
             String role = jwtTokenProvider.getRole(token);
             request.setAttribute("adminId", adminId);
             request.setAttribute("role", role);
