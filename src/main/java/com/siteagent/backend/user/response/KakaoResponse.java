@@ -1,4 +1,4 @@
-package com.siteagent.backend.user;
+package com.siteagent.backend.user.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
