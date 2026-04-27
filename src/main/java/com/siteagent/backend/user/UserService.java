@@ -1,6 +1,8 @@
 package com.siteagent.backend.user;
 
 import com.siteagent.backend.common.security.JwtTokenProvider;
+import com.siteagent.backend.user.response.KakaoResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
